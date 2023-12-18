@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -25,6 +26,7 @@ import com.crm.filrouge.service.CommandFlowService;
 
 @RestController
 @RequestMapping("/api")
+// @CrossOrigin(origins = "http://localhost:4200")
 public class ClientController {
 
     @Autowired
@@ -47,15 +49,15 @@ public class ClientController {
             commandFlowService.saveClient(client);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
-                    .body("Client created successfully");
+                    .body("{\"message\": \"Client created successfully\"}");
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity
                     .status(HttpStatus.CONFLICT)
-                    .body("Error: JSON");
+                    .body("{\"message\": \"Error: JSON\"}");
         } catch (Exception e) {
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error: " + e.getMessage());
+                    .body("{\"message\": \"Error: " + e.getMessage() + "\"}");
         }
     }
 
@@ -63,7 +65,9 @@ public class ClientController {
     public ResponseEntity<?> getClientById(@PathVariable("id") Integer id) {
         Client entity = commandFlowService.getClientById(id);
         if (entity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("{\"message\": \"Client not found\"}");
         }
         ClientDTO dto = ClientMapper.convertFromEntityToDto(entity);
         return ResponseEntity.ok(dto);
@@ -77,42 +81,52 @@ public class ClientController {
         if (existingClient != null) {
             try {
                 commandFlowService.saveClient(existingClient);
-                return ResponseEntity.ok("Client Put successfully");
+                return ResponseEntity
+                        .ok("{\"message\": \"Client Put successfully\"}");
             } catch (DataIntegrityViolationException e) {
                 return ResponseEntity
                         .status(HttpStatus.CONFLICT)
-                        .body("Error: JSON");
+                        .body("{\"message\": \"Error: JSON\"}");
             } catch (Exception e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: " + e.getMessage());
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("{\"message\": \"Error: " + e.getMessage() + "\"}");
             }
         }
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body("Client Not Found");
+                .body("{\"message\": \"Client Not Found\"}");
     }
 
     @PatchMapping("clients/{id}")
     public ResponseEntity<String> patchClient(@PathVariable("id") Integer id,
-    @RequestBody ClientPostDTO clientPatchDTO) {
-    Client client = ClientMapper.convertFromDtoToEntity(clientPatchDTO);
-    Client existingClient = commandFlowService.patchClient(client, id);
-    if (existingClient == null) {
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
-    }
-    try {
-    commandFlowService.saveClient(existingClient);
-    return ResponseEntity.ok("Client Patch successfully");
-    } catch (Exception e) {
-    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error: "
-    + e.getMessage());
-    }
+            @RequestBody ClientPostDTO clientPatchDTO) {
+        Client client = ClientMapper.convertFromDtoToEntity(clientPatchDTO);
+        Client existingClient = commandFlowService.patchClient(client, id);
+        if (existingClient == null) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("{\"message\": \"Client Not Found\"}");
+        }
+        try {
+            commandFlowService.saveClient(existingClient);
+            return ResponseEntity
+                    .ok("{\"message\": \"Client Patch successfully\"}");
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("{\"message\": \"Error: " + e.getMessage() + "\"}");
+        }
     }
 
     @DeleteMapping("clients/{id}")
     public ResponseEntity<String> deleteClient(@PathVariable("id") Integer id) {
         if (commandFlowService.deleteClient(id)) {
-            return ResponseEntity.ok("Client deleted successfully");
+            return ResponseEntity
+                    .ok("{\"message\": \"Client deleted successfully\"}");
         } else
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Client not found");
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .body("{\"message\": \"Client Not Found\"}");
     }
 }

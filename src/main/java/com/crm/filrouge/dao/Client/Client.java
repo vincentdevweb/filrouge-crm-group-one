@@ -37,7 +37,7 @@ public class Client {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(unique = true, length = 15)
+    @Column(name = "phone_number",unique = true, length = 15)
     private String phone;
 
     @Column(nullable = false, columnDefinition = "text")
